@@ -1,6 +1,7 @@
 package ru.mk.calculator3
 
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -11,6 +12,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import net.objecthunter.exp4j.ExpressionBuilder
 import ru.mk.calculator3.databinding.ActivityMainBinding
 import ru.mk.calculator3.ui.theme.Calculator3Theme
 
@@ -40,6 +42,7 @@ class MainActivity : ComponentActivity() {
         binding.plusBtn.setOnClickListener{ setTextFields("+", binding) }
         binding.openBrkBtn.setOnClickListener{ setTextFields("(", binding) }
         binding.closeBrkBtn.setOnClickListener{ setTextFields(")", binding) }
+        binding.dotBtn.setOnClickListener{ setTextFields(".", binding) }
         binding.clearBtn.setOnClickListener {
             binding.mathOperation.text = ""
             binding.resultText.text = ""
@@ -51,9 +54,29 @@ class MainActivity : ComponentActivity() {
             }
             binding.resultText.text = ""
         }
+
+        binding.eqBtn.setOnClickListener{
+            try {
+                val ex = ExpressionBuilder(binding.mathOperation.text.toString()).build()
+                val res = ex.evaluate()
+                val longRes = res.toLong()
+                if (res == longRes.toDouble()) {
+                    binding.resultText.text = longRes.toString()
+                } else {
+                    binding.resultText.text = res.toString()
+                }
+            } catch (e: Exception) {
+                Log.d("Ошибка", "Сообщение: ${e.message}")
+            }
+        }
     }
 
     fun setTextFields(str: String, binding: ActivityMainBinding) {
+        if (binding.resultText.text.isNotEmpty()) {
+            binding.mathOperation.text = binding.resultText.text
+            binding.resultText.text = ""
+        }
+
         binding.mathOperation.append(str)
     }
 }
